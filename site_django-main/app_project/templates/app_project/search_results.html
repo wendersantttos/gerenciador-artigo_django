@@ -1,0 +1,23 @@
+{% extends 'home.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Resultados de pesquisa para "{{ query }}"</h2>
+
+    {% if results %}
+        <div class="list-group">
+            {% for article in results %}
+                <a href="{% url 'article_detail' pk=article.pk %}" class="list-group-item list-group-item-action">
+                    <h5 class="mb-1">{{ article.title }}</h5>
+                    <p class="mb-1"><strong>Autores:</strong> {{ article.authors }}</p>
+                    <p class="mb-1"><strong>Resumo:</strong> {{ article.abstract }}</p>
+                    <small><strong>Palavras-chave:</strong> {{ article.keywords }}</small>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning" role="alert">
+            Nenhum resultado encontrado para "{{ query }}".
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

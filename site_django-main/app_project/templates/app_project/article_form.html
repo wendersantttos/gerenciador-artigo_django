@@ -1,0 +1,169 @@
+{% extends 'home.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="text-center mb-4">{{ form.instance.pk|yesno:"Editar Artigo,Novo Artigo" }}</h1>
+
+            <form method="post" enctype="multipart/form-data" id="articleForm" class="border p-4 rounded shadow">
+                {% csrf_token %}
+
+                <!-- Campo Título -->
+                <div class="mb-3">
+                    <label for="id_title" class="form-label">Título</label>
+                    <input type="text" class="form-control" id="id_title" name="title" value="{{ form.instance.title }}" placeholder="Título do artigo" required>
+                    <div class="invalid-feedback">O título deve ter no mínimo 10 caracteres.</div>
+                </div>
+
+                <!-- Campo Autores -->
+                <div class="mb-3">
+                    <label for="id_authors" class="form-label">Autores</label>
+                    <input type="text" class="form-control" id="id_authors" name="authors" value="{{ form.instance.authors }}" placeholder="Nome dos autores" required>
+                    <div class="invalid-feedback">Formato inválido. Use "Sobrenome, Nome; Sobrenome, Nome".</div>
+                </div>
+
+                <!-- Campo Resumo -->
+                <div class="mb-3">
+                    <label for="id_abstract" class="form-label">Resumo</label>
+                    <textarea class="form-control" id="id_abstract" name="abstract" rows="3" placeholder="Resumo do artigo" required>{{ form.instance.abstract }}</textarea>
+                    <div class="invalid-feedback">O resumo deve ter entre 100 e 1500 caracteres.</div>
+                </div>
+
+                <!-- Campo Palavras-chave -->
+                <div class="mb-3">
+                    <label for="id_keywords" class="form-label">Palavras-chave</label>
+                    <input type="text" class="form-control" id="id_keywords" name="keywords" value="{{ form.instance.keywords }}" placeholder="Ex: 'Sistemas de recuperação. Linguagem natural.'" required>
+                    <div class="invalid-feedback">As frases devem ser separadas por ponto e espaço, e terminar com ponto final.</div>
+                </div>
+
+                <!-- Campo Data -->
+                <div class="mb-3">
+                    <label for="id_date" class="form-label">Data</label>
+                    <input type="text" class="form-control" id="id_date" name="date" value="{{ form.instance.date }}" placeholder="Ano (ex: 2000)" required>
+                    <div class="invalid-feedback">A data deve estar entre 1900 e o ano atual.</div>
+                </div>
+
+                <!-- Campo Jornal -->
+                <div class="mb-3">
+                    <label for="id_journal" class="form-label">Jornal</label>
+                    <input type="text" class="form-control" id="id_journal" name="journal" value="{{ form.instance.journal }}" placeholder="Nome da revista ou jornal" required>
+                    <div class="invalid-feedback">Este campo é obrigatório.</div>
+                </div>
+
+                <!-- Campo Arquivo PDF -->
+                <div class="mb-3">
+                    <label for="id_pdf_file" class="form-label">Arquivo PDF</label>
+                    <input type="file" class="form-control" id="id_pdf_file" name="pdf_file" accept="application/pdf">
+                    <div class="invalid-feedback">Por favor, envie um arquivo PDF válido.</div>
+                </div>
+
+                <!-- Botão de Salvar -->
+                <button type="submit" class="btn btn-primary w-100">Salvar</button>
+
+                <!-- Mensagens do Django -->
+                {% if messages %}
+                <div class="alert alert-info mt-3">
+                    <ul class="list-unstyled mb-0">
+                        {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Botão de Voltar -->
+                <a href="{% url 'article_list' %}" class="btn btn-secondary w-100 mt-3">Voltar</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Validação dinâmica com JavaScript -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById('articleForm');
+
+        // Adiciona o listener para o submit
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+
+        // Verificação de título
+        const titleInput = document.getElementById('id_title');
+        titleInput.addEventListener('input', function() {
+            if (titleInput.value.length < 10) {
+                titleInput.classList.add('is-invalid');
+            } else {
+                titleInput.classList.remove('is-invalid');
+                titleInput.classList.add('is-valid');
+            }
+        });
+
+        // Verificação de autores
+        const authorsInput = document.getElementById('id_authors');
+        const authorsRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ,;\s]+$/;
+        authorsInput.addEventListener('input', function() {
+            if (!authorsRegex.test(authorsInput.value)) {
+                authorsInput.classList.add('is-invalid');
+            } else {
+                authorsInput.classList.remove('is-invalid');
+                authorsInput.classList.add('is-valid');
+            }
+        });
+
+        // Verificação de resumo
+        const abstractInput = document.getElementById('id_abstract');
+        abstractInput.addEventListener('input', function() {
+            const length = abstractInput.value.length;
+            if (length < 100 || length > 1500) {
+                abstractInput.classList.add('is-invalid');
+            } else {
+                abstractInput.classList.remove('is-invalid');
+                abstractInput.classList.add('is-valid');
+            }
+        });
+
+        // Verificação de palavras-chave
+        const keywordsInput = document.getElementById('id_keywords');
+        const keywordsRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+(\.\s*[A-Za-zÀ-ÖØ-öø-ÿ\s]+)*\.$/;
+        keywordsInput.addEventListener('input', function() {
+            if (!keywordsRegex.test(keywordsInput.value)) {
+                keywordsInput.classList.add('is-invalid');
+            } else {
+                keywordsInput.classList.remove('is-invalid');
+                keywordsInput.classList.add('is-valid');
+            }
+        });
+
+        // Verificação de data
+        const dateInput = document.getElementById('id_date');
+        const currentYear = new Date().getFullYear();
+        dateInput.addEventListener('input', function() {
+            const year = parseInt(dateInput.value);
+            if (isNaN(year) || year < 1900 || year > currentYear) {
+                dateInput.classList.add('is-invalid');
+            } else {
+                dateInput.classList.remove('is-invalid');
+                dateInput.classList.add('is-valid');
+            }
+        });
+
+        // Verificação de arquivo PDF
+        const pdfInput = document.getElementById('id_pdf_file');
+        pdfInput.addEventListener('change', function() {
+            const file = pdfInput.files[0];
+            if (file && file.type !== 'application/pdf') {
+                pdfInput.classList.add('is-invalid');
+            } else {
+                pdfInput.classList.remove('is-invalid');
+                pdfInput.classList.add('is-valid');
+            }
+        });
+    });
+</script>
+
+{% endblock %}
