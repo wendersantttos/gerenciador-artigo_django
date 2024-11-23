@@ -1,0 +1,54 @@
+{% extends 'home.html' %}
+{% block content %}
+    
+<div class="hero">
+    <div class="container">
+        <h1 class="display-4">Bem-vindo ao UaiArtigos!</h1>
+        <p class="lead">Encontre, compartilhe e aprenda sobre diversos artigos aqui.</p>
+        <a href="{% url 'article_create' %}" class="btn btn-light btn-lg">Criar Novo Artigo</a>
+    </div>
+</div>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <!-- Botão de Adicionar Artigo -->
+            <a href="{% url 'article_create' %}" class="btn btn-primary mb-3 w-100">Adicionar um Artigo</a>
+
+            <!-- Formulário de Ordenação -->
+            <div class="mb-3">
+                <form method="get" class="d-flex">
+                    <label for="sort" class="form-label me-2">Ordenar por:</label>
+                    <select id="sort" name="sort" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Título</option>
+                        <option value="date" {% if sort_by == 'date' %}selected{% endif %}>Data</option>
+                        <option value="authors" {% if sort_by == 'authors' %}selected{% endif %}>Autores</option>
+                    </select>
+                </form>
+            </div>
+
+            <!-- Listagem de Artigos -->
+            {% if articles %}
+            <div class="article-list">
+                {% for article in articles %}
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title text-center mb-2">
+                            <a href="{% url 'article_detail_site' pk=article.pk %}" class="text-decoration-none text-primary">{{ article.title }}</a>
+                        </h6>
+                        <p class="card-text text-muted" style="font-size: 0.9rem;"> <!-- Fonte um pouco maior -->
+                            <strong>Autor(es):</strong> {{ article.authors }}<br>
+                            <strong>Palavras-chave:</strong> {{ article.keywords }}<br>
+                            <strong>Resumo:</strong> {{ article.abstract|truncatewords:15 }}
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!--  de Nenhum Artigo Encontrado -->
+            <div class="alert alert-info text-center" role="alert">Nenhum artigo encontrado.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "home.html" %}
+{% block content %}
+    <style>
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            margin: auto;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="email"]:focus {
+            border-color: #007bff; /* Cor ao focar no campo */
+            outline: none; /* Remove a borda padrão do foco */
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .message {
+            margin-top: 20px;
+            color: red;
+            font-size: 14px;
+            border: 1px solid #ffcccc; /* Borda vermelha para o aviso */
+            background-color: #ffe6e6; /* Fundo claro para destaque */
+            padding: 10px;
+            border-radius: 5px;
+            list-style: none; /* Remove os marcadores de lista */
+            text-align: left; /* Alinha o texto à esquerda */
+        }
+
+        .message li {
+            margin: 5px 0; /* Espaço entre os itens da lista */
+        }
+
+        .help-links {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .help-links a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .help-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Estilo adicional para tornar os avisos mais visuais */
+        .icon-warning {
+            width: 20px;
+            vertical-align: middle; /* Alinha o ícone verticalmente */
+            margin-right: 5px; /* Espaço entre o ícone e o texto */
+        }
+    </style>
+
+    <div class="login-container">
+        <h1>Criar uma Conta</h1>
+
+        <!-- Formulário de registro -->
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }} <!-- Exibe o formulário com os campos gerados automaticamente -->
+            <input type="submit" value="Cadastrar" />
+        </form>
+
+        <!-- Mensagens de erro, se existirem -->
+        {% if form.errors %}
+            <div class="message">
+                <ul>
+                    <li><img src="warning-icon.png" alt="Aviso" class="icon-warning">Corrija os seguintes erros:</li> <!-- Ícone de aviso -->
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Links úteis -->
+        <div class="help-links">
+            <p>Já tem uma conta? <a href="{% url 'login' %}">Faça login</a></p>
+        </div>
+    </div>
+{% endblock %}

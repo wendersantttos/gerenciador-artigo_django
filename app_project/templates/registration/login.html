@@ -1,0 +1,125 @@
+{% extends "home.html" %}
+
+{% block content %}
+
+<div class="hero">
+
+</div>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    height: 100vh;
+    margin: 0;
+}
+
+.login-container {
+    background: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    position: absolute; /* Altera para absolute */
+    top: 50%; /* Centraliza verticalmente */
+    left: 50%; /* Centraliza horizontalmente */
+    transform: translate(-50%, -50%); /* Ajusta a posição para centralizar */
+}
+    h1 {
+        margin-bottom: 20px;
+        color: #333;
+    }
+    input[type="text"], input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    button, input[type="submit"] {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+    }
+    button:hover, input[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+    .message {
+        margin-top: 10px;
+        color: red;
+    }
+    .help-links {
+        margin-top: 15px;
+        font-size: 14px;
+    }
+    .help-links a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    .help-links a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="login-container">
+    <h1>Login</h1>
+
+    <!-- Mensagens de erro e acesso restrito -->
+    {% if form.errors %}
+        <p class="message">Seu nome de usuário e senha não coincidem. Tente novamente.</p>
+    {% endif %}
+
+    {% if q %}
+        <p>Você buscou por: "{{ q }}"</p>
+    {% else %}
+        <p>Não há consulta de busca.</p>
+    {% endif %}
+
+    {% if next %}
+        {% if user.is_authenticated %}
+            <p class="message">Sua conta não tem acesso a esta página. Por favor, faça login com uma conta que tenha acesso.</p>
+        {% else %}
+            <p class="message">Por favor, faça login para ver esta página.</p>
+        {% endif %}
+    {% endif %}
+
+    <!-- Formulário de login -->
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div>
+            {{ form.username.label_tag }}
+            {{ form.username }}
+        </div>
+        <div>
+            {{ form.password.label_tag }}
+            {{ form.password }}
+        </div>
+        <input type="submit" value="Entrar" />
+        <input type="hidden" name="next" value="{{ next }}" />
+    </form>
+
+    <!-- Mensagens gerais -->
+    {% if messages %}
+        <div class="message">
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+        <!-- Link para recuperação de senha -->
+        <div class="help-links">
+            <p><a href="{% url 'password_reset' %}">Esqueceu sua senha?</a></p>
+            <p><a href="{% url 'register' %}" class="button">Criar uma conta</a></p> <!-- Botão de Cadastro -->
+        </div>
+    </div>
+
+
+{% endblock %}

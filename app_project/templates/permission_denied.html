@@ -1,0 +1,10 @@
+{% extends 'home.html' %}
+
+{% block content %}
+  <div style="text-align: center;">
+    <h2>Permissão Negada</h2>
+    <p>Você não tem permissão para concluir essa ação.</p>
+    <a href="{% url 'article_list' %}">Voltar para a lista de artigos</a>
+  </div>
+{% endblock %}
+

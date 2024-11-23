@@ -1,0 +1,50 @@
+{% extends 'home.html' %}
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="mb-4">Artigo: {{ article.title }}</h1>
+
+        <div class="mb-4">
+            <h4>Detalhes do Artigo</h4>
+            <p><strong>Autores:</strong> {{ article.authors }}</p>
+            <p><strong>Resumo:</strong> {{ article.abstract }}</p>
+            <p><strong>Palavras-chave:</strong> {{ article.keywords }}</p>
+            <p><strong>Data de Publicação:</strong> {{ article.date }}</p>
+            <p><strong>Revista:</strong> {{ article.journal }}</p>
+            <p><strong>Nome do Arquivo:</strong> {{ article.pdf_file.name }}</p>
+            <p><strong>Criado em:</strong> {{ article.created_at|date:"d/m/Y H:i" }}</p>
+            <p><strong>Última modificação:</strong> {{ article.updated_at|date:"d/m/Y H:i" }}</p>
+        </div>
+
+        <div class="mb-4">
+            <h4>Visualizar PDF</h4>
+            <embed src="{{ article.pdf_file.url }}" type="application/pdf" width="100%" height="600px">
+        </div>
+
+        <h3>Histórico de Alterações</h3>
+        {% if article.history.exists %}
+            <ul>
+            {% for version in article.history.all %}
+                <li>
+                    <strong>Modificado em:</strong> {{ version.updated_at|date:"d/m/Y H:i" }}<br>
+                    <strong>Título:</strong> {{ version.title }}<br>
+                    <strong>Autor(es):</strong> {{ version.authors }}<br>
+                    <strong>Palavras-chave:</strong> {{ version.keywords }}<br>
+                    <hr>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>Não há histórico de alterações.</p>
+        {% endif %}
+
+
+
+        <div class="mt-4">
+            <a href="{% url 'article_update' pk=article.pk %}" class="btn btn-primary">Editar</a>
+            <a href="{{ article.pdf_file.url }}" class="btn btn-dark">Download</a>
+            <a href="{% url 'article_delete' pk=article.pk %}" class="btn btn-danger">Excluir</a>
+            <a href="{% url 'article_list' %}" class="btn btn-secondary">Voltar</a>
+        </div>
+    </div>
+{% endblock %}
+

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        #chatbot-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        #chat-window {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chat-header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            font-size: 20px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #chat-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        #chat-messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .message.user {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .message.bot {
+            background-color: #e1e1e1;
+            align-self: flex-start;
+        }
+
+        .typing {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0.5; }
+        }
+
+        #chat-input-container {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+        #chat-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        #send-button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #rating-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+        #rating-container label {
+            margin: 5px 0;
+        }
+
+        #rating-container input {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<button id="chatbot-button" onclick="openChat()">Chat</button>
+
+<div id="chat-window">
+    <div id="chat-header">Atendente Virtual</div>
+    <div id="chat-content">
+        <div id="chat-messages"></div>
+        <div id="chat-input-container">
+            <input type="text" id="chat-input" placeholder="Digite sua pergunta...">
+            <button id="send-button" onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+</div>
+
+<div id="rating-container">
+    <label>Por favor, avalie nosso atendimento de 0 a 10:</label>
+    <input type="number" id="rating" min="0" max="10">
+    <button id="send-rating" onclick="sendRating()">Enviar Avaliação</button>
+</div>
+
+<script>
+const attendants = ["Wender", "Erica", "Gabriel"];
+let currentAttendantIndex = 0;
+
+function openChat() {
+    document.getElementById('chat-window').style.display = 'flex';
+}
+
+function sendMessage() {
+    const input = document.getElementById('chat-input').value;
+    const chatMessages = document.getElementById('chat-messages');
+
+    if (input.trim() !== '') {
+        chatMessages.innerHTML += `<div class="message user">${input}</div>`;
+        const botMessage = document.createElement('div');
+        botMessage.className = 'message bot typing';
+        botMessage.innerText = `${attendants[currentAttendantIndex]} está digitando...`;
+        chatMessages.appendChild(botMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        fetch('/chatbot/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ question: input })
+        })
+        .then(response => response.json())
+        .then(data => {
+            setTimeout(() => {
+                botMessage.classList.remove('typing');
+                botMessage.innerText = `${attendants[currentAttendantIndex]}: ${data.answer}`;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                if (currentAttendantIndex === attendants.length - 1) {
+                    askForFeedback();
+                }
+
+                currentAttendantIndex = (currentAttendantIndex + 1) % attendants.length;
+            }, 1000);
+        });
+
+        document.getElementById('chat-input').value = '';
+    }
+}
+
+function askForFeedback() {
+    const chatMessages = document.getElementById('chat-messages');
+    chatMessages.innerHTML += `<div class="message bot">Você precisa de mais alguma coisa?</div>`;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    setTimeout(() => {
+        const chatInputContainer = document.getElementById('chat-input-container');
+        chatInputContainer.style.display = 'none';
+        const ratingContainer = document.getElementById('rating-container');
+        ratingContainer.style.display = 'flex';
+    }, 2000);
+}
+
+function sendRating() {
+    const rating = document.getElementById('rating').value;
+    const chatMessages = document.getElementById('chat-messages');
+    chatMessages.innerHTML += `<div class="message bot">Obrigado por sua avaliação de ${rating}!</div>`;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    const ratingContainer = document.getElementById('rating-container');
+    ratingContainer.style.display = 'none';
+
+    const chatInputContainer = document.getElementById('chat-input-container');
+    chatInputContainer.style.display = 'flex';
+
+    chatMessages.innerHTML += `<div class="message bot">Agradecemos por usar o nosso sistema!</div>`;
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
+</body>
+</html>
